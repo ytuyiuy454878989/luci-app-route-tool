@@ -80,7 +80,9 @@ rt_emmc_manf_name() {
         0c) echo "Winbond(华邦)" ;;
         11) echo "Toshiba(东芝)" ;;
         13) echo "Micron(美光)" ;;
-        15) echo "Samsung(三星)/SanDisk(闪迪)" ;;
+        # MID 0x15 = Samsung 专有; 实测 PNM: AGND3R/8GTF4R/8GME4R/8GND3R/4FTE4R/BJTD4R/CJTD4R
+        # SanDisk 的 eMMC 用 0x45, 不再与 0x15 并列(避免显示双品牌)
+        15) echo "Samsung(三星)" ;;
         19) echo "Western Digital(西部数据)" ;;
         1b) echo "Transcend(创见)/Samsung(三星)" ;;
         1d) echo "Corsair(海盗船)/ADATA(威刚)" ;;
@@ -89,7 +91,8 @@ rt_emmc_manf_name() {
         25) echo "Kingston(金士顿)" ;;
         28) echo "Crucial(英睿达)/Lexar(雷克沙)" ;;
         29) echo "ADATA(威刚)" ;;
-        2c) echo "Hikvision(海康)/HIKSEMI(海康存储)" ;;
+        # 实测(京东云 bt_srn1, PNM=SDS7D2): 只出海康存储, 不带海康威视
+        2c) echo "HIKSEMI(海康存储)" ;;
         2d) echo "YMTC(长江存储)" ;;
         2e) echo "CXMT(长鑫存储)" ;;
         2f) echo "Konsemi(康芯威)" ;;
@@ -110,9 +113,14 @@ rt_emmc_manf_name() {
         df) echo "SYC(时意创)/SiliconGo(硅格)" ;;
         ec) echo "Rayson(晶存)" ;;
         # 国产/代工
-        88|d6) echo "Longsys(江波龙)" ;;
+        88) echo "Longsys(江波龙)" ;;
+        # MID 0xD6 下实测有两个固件族:
+        #   PNM=MMC8GB (OID 0x00) -> Hosin Global, 见 rt_emmc_chip_name
+        #   PNM=A3A4xx/A3A5xx/08A391 (OID 0x03) -> 与 0x88 江波龙同族
+        d6) echo "Longsys(江波龙)" ;;
         f4) echo "BIWIN(佰维)" ;;
-        ea) echo "SPeMMC/硅格(SiliconGo)/康盈(Kowin)" ;;
+        # MID 0xEA 是共用 ID: SPeMMC 为 SiliconGo(硅格); 康盈(Kowin) S03111 由 PNM 区分
+        ea) echo "SiliconGo(硅格)" ;;
         f2) echo "ICMAX(宏旺)" ;;
         fe) echo "Micron(美光)" ;;
         "") echo "未知" ;;
@@ -143,6 +151,8 @@ rt_emmc_chip_name() {
         # SYC 时意创 SCA08G/SCA128 系列
         df:534341*) echo "SYC(时意创)" ;;
         88:4e43617264) echo "Longsys(江波龙)" ;;
+        # 编程器实测丝印 Hosin Global, MID 0xD6 / PNM MMC8GB(4d4d43384742), OID 0x00
+        d6:4d4d43384742) echo "Hosin Global" ;;
         9b:593053323536) echo "YMTC(长江存储)" ;;
         *) rt_emmc_manf_name "$mid" ;;
     esac

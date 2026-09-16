@@ -23,5 +23,5 @@ while IFS=, read -r sample mid pnm_ascii pnm_hex prv mdt date check; do
     if [ "$ok" = 1 ]; then pass=$((pass+1)); else fail=$((fail+1)); fi
 done < "$CSV"
 
-echo "emmc cid fixtures: pass=$pass fail=$fail / 59"
+echo "emmc cid fixtures: pass=$pass fail=$fail / $((pass + fail))"
 [ "$fail" -eq 0 ]

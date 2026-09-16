@@ -200,9 +200,11 @@ if [ -n "$MMC_SYS" ]; then
 
     # Manufacturer from CID first byte
     MANFID="$(printf '%s' "$CID_RAW" | cut -c1-2)"
+    PRDCT_HEX="$(printf '%s' "$CID_RAW" | cut -c7-18)"
     SCRIPT_DIR="${0%/*}"; [ "$SCRIPT_DIR" = "$0" ] && SCRIPT_DIR="."
     . "$SCRIPT_DIR/storage_common.sh"
-    echo "EMMC_MANUFACTURER=$(rt_emmc_manf_name "$MANFID")"
+    # 与 storage_health.sh 保持一致: 按 MID+PNM 精确识别, 不走 MID 兜底
+    echo "EMMC_MANUFACTURER=$(rt_emmc_chip_name "$MANFID" "$PRDCT_HEX")"
 
     # BOOT1/BOOT2 size from ext_csd bytes 226/227 (unit: 128KB)
     EXT_CSD="$(rt_read_ext_csd 300 2>/dev/null || true)"

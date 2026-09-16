@@ -1,5 +1,8 @@
 #!/bin/sh
-# Build a standard OpenWrt opkg package (ar outer container).
+# Build a standard OpenWrt ipk package (tar.gz outer container).
+# NOTE: outer container MUST be tar.gz, not ar — BusyBox opkg on QWRT etc.
+# has no 'ar' applet and fails with 'Malformed package file' on ar ipk.
+# Format regression was introduced in v0.3.30 and reverted in v0.3.33.
 
 set -eu
 umask 022
@@ -27,11 +30,11 @@ printf '2.0\n' > "$STAGE/debian-binary"
 tar --owner=0 --group=0 --numeric-owner -C "$STAGE/control" -czf "$STAGE/control.tar.gz" .
 tar --owner=0 --group=0 --numeric-owner -C "$STAGE/data" -czf "$STAGE/data.tar.gz" .
 rm -f "$OUT"
-(cd "$STAGE" && ar cr "$OUT" debian-binary control.tar.gz data.tar.gz)
+(cd "$STAGE" && tar -czf "$OUT" ./debian-binary ./control.tar.gz ./data.tar.gz)
 
-ar t "$OUT" | grep -qx 'debian-binary'
-ar t "$OUT" | grep -qx 'control.tar.gz'
-ar t "$OUT" | grep -qx 'data.tar.gz'
+tar tzf "$OUT" | grep -qx './debian-binary'
+tar tzf "$OUT" | grep -qx './control.tar.gz'
+tar tzf "$OUT" | grep -qx './data.tar.gz'
 
 SIZE="$(wc -c < "$OUT")"
 SHA256="$(sha256sum "$OUT" | awk '{print $1}')"
